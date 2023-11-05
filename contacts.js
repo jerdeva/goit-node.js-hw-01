@@ -1,65 +1,68 @@
-import fs from "fs/promises";
-import path from "path";
-import { nanoid } from "nanoid";
+const fs = require("fs").promises;
+const { nanoid } = require("nanoid");
+const path = require("path");
 
-const contactsPath = path.join("db", "contacts.json");
+const contactsPath = path.join(__dirname, "./db/contacts.json");
 
-const updateContacts = contacts =>
-  fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-
-
-// TODO: задокументировать каждую функцию
-export const listContacts = async () => {
+async function listContacts() {
   try {
-    // ...твой код. Возвращает массив контактов.
-    const result = await fs.readFile(contactsPath);
-    return JSON.parse(result);
+    const data = await fs.readFile(contactsPath, "utf-8");
+    const contacts = JSON.parse(data);
+    return contacts;
   } catch (error) {
-    throw new Error(`Ошибка при получении списка контактов: ${error.message}`);
+    throw error;
   }
-};
+}
 
-export const getContactById = async (id) => {
-  // ...твой код. Возвращает объект контакта с таким id. Возвращает null, если объект с таким id не найден.
+async function getContactById(contactId) {
   try {
+    const id = String(contactId);
     const contacts = await listContacts();
-    const result = contacts.find((item) => item.id === id);
-    return result || null;
+    const contact = contacts.find((contact) => contact.id === id);
+    return contact || null;
   } catch (error) {
-    throw new Error(`Ошибка при поиске контакта: ${error.message}`);
+    throw error;
   }
-};
+}
 
-export const removeContact = async (id) => {
-  // ...твой код. Возвращает объект удаленного контакта. Возвращает null, если объект с таким id не найден.
+async function removeContact(contactId) {
   try {
+    const id = String(contactId);
     const contacts = await listContacts();
-    const index = contacts.findIndex((item) => item.id === id);
+    const index = contacts.findIndex((contact) => contact.id === id);
     if (index === -1) {
       return null;
     }
-    const [result] = contacts.splice(index, 1);
-    await updateContacts;
-    return result;
-  } catch (error) {
-    throw new Error(`Ошибка при удалении контакта: ${error.message}`);
-  }
-};
 
-export const addContact = async (name, email, phone) => {
-  // ...твой код. Возвращает объект добавленного контакта.
+    const removedContact = contacts.splice(index, 1)[0];
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+    return removedContact;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function addContact(name, email, phone) {
   try {
     const contacts = await listContacts();
-    const newContscts = {
+    const newContact = {
       id: nanoid(),
       name,
       email,
       phone,
     };
-    contacts.push(newContscts);
-    await updateContacts(contacts);
-    return newContscts;
+
+    contacts.push(newContact);
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+    return newContact;
   } catch (error) {
-    throw new Error(`Ошибка при добавлении контакта: ${error.message}`);
+    throw error;
   }
+}
+
+module.exports = {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
 };
