@@ -9,7 +9,7 @@
     "dev": "nodemon index"
   },
   "keywords": [],
-  "author": "",
+  "author": "Olena Jerdeva",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.0.1"
